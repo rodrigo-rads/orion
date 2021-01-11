@@ -1,0 +1,64 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.IO;
+using System.Net.Http;
+using RestSharp;
+using Microsoft.AspNet.WebHooks;
+using System.Web.Http;
+
+namespace WhatsAppAPI_Makro
+{
+  public partial class _Default : Page
+  {
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+    }
+
+    protected void ReturnClients(object sender, EventArgs e)
+    {
+      /* Esse metodo captura a lista de ususarios que aceitaram o convite para conversa(OPT-IN)
+       * No momento essa lista está sendo impressa na tela de forma crua
+       */
+      string AppName = "MakroMensagens";
+
+      var client = new RestClient("https://api.gupshup.io/sm/api/v1/users/" + AppName);
+      var request = new RestRequest(Method.GET);
+      request.AddHeader("apikey", "00cqesrp48oi1xsk4jxqrfjadtxywzs1");
+
+      IRestResponse response = client.Execute(request);
+      LabelClientsReturn.Text = response.Content.ToString();
+    }
+    protected void SendMessage(object sender, EventArgs e)
+    {
+      /*
+       * Metodo que envia mensagem via WhatsApp.
+       * Os numeros abaixo são para testes apenas, caso publicado favor conferir
+       * 
+       * 
+       */
+      
+      string ClientMessage = Message.Text;
+      string PhoneNumber = Phone.Text;
+      var client = new RestClient("https://api.gupshup.io/sm/api/v1/msg");
+      client.Timeout = -1;
+      var request = new RestRequest(Method.POST);
+      request.AddHeader("Cache-Control", "no-cache");
+      request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+      request.AddHeader("apikey", "00cqesrp48oi1xsk4jxqrfjadtxywzs1");
+      request.AddParameter("channel", "whatsapp");
+      request.AddParameter("source", "917834811114");
+      request.AddParameter("destination", PhoneNumber);
+      request.AddParameter("message", "{\"type\":\"text\",\"text\":\" " + ClientMessage + "\"}");
+      request.AddParameter("src.name", "MakroMensagens");
+      IRestResponse response = client.Execute(request);
+      LabelMessageReturn.Text = response.Content.ToString();
+    }
+   
+  }
+}
